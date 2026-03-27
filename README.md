@@ -1,36 +1,132 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# elysia-anon-chat
+
+An anonymous messaging app where users can send messages to each other without revealing their identity. Built with Next.js, Elysia.js, and Drizzle ORM.
+
+## Features
+
+- **Anonymous messaging** — send messages to any user without revealing who you are
+- **Conversation management** — view, reply to, and delete conversations
+- **Block accounts** — block users from sending you messages
+- **Message accepting toggle** — turn off incoming anonymous messages at any time
+- **Authentication** — email/password (Gmail only) and OAuth via Google & GitHub
+- **Admin panel** — role-based admin access with impersonation support
+- **OpenAPI docs** — auto-generated API documentation via Scalar
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Framework | [Next.js 16](https://nextjs.org) (App Router) |
+| Runtime | [Bun](https://bun.sh) |
+| API | [Elysia.js](https://elysiajs.com) (mounted as Next.js API routes) |
+| Database | [Neon](https://neon.tech) (serverless PostgreSQL) |
+| ORM | [Drizzle ORM](https://orm.drizzle.team) |
+| Auth | [Better Auth](https://www.better-auth.com) |
+| UI | [Tailwind CSS v4](https://tailwindcss.com), [shadcn/ui](https://ui.shadcn.com), [Tabler Icons](https://tabler.io/icons), [Lucide](https://lucide.dev) |
+| State | [TanStack Query](https://tanstack.com/query) |
+| Forms | [React Hook Form](https://react-hook-form.com) + [Zod](https://zod.dev) |
+| API Client | [Elysia Eden](https://elysiajs.com/eden/overview.html) (fully typed) |
+| Deployment | [Vercel](https://vercel.com) |
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- [Bun](https://bun.sh) v1.x or later
+- A [Neon](https://neon.tech) (or compatible) PostgreSQL database
+- Google and/or GitHub OAuth app credentials (optional, for social login)
+
+### 1. Install dependencies
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+bun install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Configure environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Create a `.env.local` file in the project root:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```env
+# Database
+DATABASE_URL=postgresql://user:password@host/dbname
 
-## Learn More
+# Better Auth
+BETTER_AUTH_URL=http://localhost:3000
+NEXT_BETTER_AUTH_URL=http://localhost:3000
 
-To learn more about Next.js, take a look at the following resources:
+# Google OAuth (optional)
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_REDIRECT_URI=http://localhost:3000/api/auth/callback/google
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# GitHub OAuth (optional)
+GITHUB_CLIENT_ID=
+GITHUB_CLIENT_SECRET=
+GITHUB_REDIRECT_URI=http://localhost:3000/api/auth/callback/github
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. Run database migrations
 
-## Deploy on Vercel
+```bash
+bun run db:migrate
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### 4. Start the development server
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+bun run dev
+```
+
+Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Scripts
+
+| Command | Description |
+|---|---|
+| `bun run dev` | Start the development server |
+| `bun run build` | Build for production |
+| `bun run start` | Start the production server |
+| `bun run lint` | Run ESLint |
+| `bun run db:generate` | Generate Drizzle migration files |
+| `bun run db:migrate` | Apply pending migrations |
+| `bun run db:push` | Push schema changes directly (dev only) |
+| `bun run auth:generate` | Regenerate Better Auth schema |
+
+## Project Structure
+
+```
+├── app/
+│   ├── (app)/          # Authenticated app routes (dashboard, user, admin)
+│   ├── (auth)/         # Auth routes (sign-in, sign-up)
+│   └── api/            # Elysia API routes
+├── components/         # Shared UI components
+├── db/
+│   ├── drizzle.ts      # Database client
+│   └── schema.ts       # Drizzle table definitions & relations
+├── lib/
+│   ├── auth.ts         # Better Auth server config
+│   ├── auth-client.ts  # Better Auth browser client
+│   └── elysia-client.ts# Typed Eden API client
+├── migrations/         # Drizzle migration files
+├── modules/            # Elysia route controllers (messages, conversations, etc.)
+└── server/             # Server actions
+```
+
+## API Documentation
+
+The Scalar OpenAPI UI is available at `/api/reference` when the development server is running.
+
+## Auth Notes
+
+- Email/password sign-up requires a **Gmail address** (`@gmail.com`)
+- Usernames must be between **8 and 20 characters** and cannot be `admin`
+- Sessions expire after **7 days**
+
+## Deployment
+
+This project is configured for deployment on [Vercel](https://vercel.com) with Bun as the runtime (`bunVersion: "1.x"` in `vercel.json`).
+
+1. Push your code to GitHub
+2. Import the repository on Vercel
+3. Set all environment variables from the `.env.local` template above
+4. Deploy
